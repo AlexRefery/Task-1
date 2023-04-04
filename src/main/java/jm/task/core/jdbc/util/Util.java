@@ -1,5 +1,11 @@
 package jm.task.core.jdbc.util;
 
+import jm.task.core.jdbc.model.User;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -16,9 +22,14 @@ public class Util {
     private static final String URL_KEY = "db.url";
     private static final String USERNAME_KEY = "db.username";
 
+    private static SessionFactory sessionFactory;
+
+
     static {
         loadDriver();
         loadProperties();
+
+        createSessionFactory();
     }
 
     private static void loadProperties() {
@@ -48,5 +59,16 @@ public class Util {
             System.out.println("Не можем получить connection. Ищите трабл!");
             throw new RuntimeException(e);
         }
+    }
+
+    private static void createSessionFactory() {
+        Configuration configuration = new Configuration();
+        configuration.addAnnotatedClass(User.class);
+        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties()).build();
+        sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+    }
+
+    public static SessionFactory getSessionFactory() {
+        return sessionFactory;
     }
 }
